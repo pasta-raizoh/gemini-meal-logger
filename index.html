@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Gemini 食事報告メーカー</title>
+
+  <!-- iOS ホーム画面追加 (PWA) 用メタタグ -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="食事報告">
+  <meta name="theme-color" content="#f8fafc">
+
+  <!-- アプリアイコン (SVGデータURI) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f46e5'/%3E%3Cpath d='M50 22c2 14 14 26 28 28-14 2-26 14-28 28-2-14-14-26-28-28 14-2 26-14 28-28z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f46e5'/%3E%3Cpath d='M50 22c2 14 14 26 28 28-14 2-26 14-28 28-2-14-14-26-28-28 14-2 26-14 28-28z' fill='%23ffffff'/%3E%3C/svg%3E">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter & Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* iOS Safariでのフォーカス時自動ズーム防止のため入力欄は16px以上を確保 */
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+
+    /* タップ時のハイライト抑制と滑らかなアニメーション */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* スムーズなアコーディオン展開用 */
+    .slide-panel {
+      transition: max-height 0.25s ease-out, opacity 0.2s ease-out, margin-top 0.2s ease-out;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- メインコンテナ (モバイルファースト幅制限) -->
+  <div class="w-full max-w-lg mx-auto px-4 pt-5 pb-32 flex-1">
+
+    <!-- 1. ヘッダー -->
+    <header class="mb-5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <!-- Gemini風スパークルアイコン -->
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-sm shrink-0">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C12.7 7.2 16.8 11.3 22 12C16.8 12.7 12.7 16.8 12 22C11.3 16.8 7.2 12.7 2 12C7.2 11.3 11.3 7.2 12 2Z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+              Gemini 食事報告メーカー
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+              食べたものを入力してワンタップで報告文を作成
+            </p>
+          </div>
+        </div>
+
+        <!-- ホーム画面追加ガイドボタン -->
+        <button
+          type="button"
+          id="toggleGuideBtn"
+          aria-expanded="false"
+          class="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:scale-95 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shrink-0"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          <span>ホーム追加</span>
+        </button>
+      </div>
+
+      <!-- iPhoneホーム画面追加ガイド（折りたたみ式） -->
+      <div id="iosGuideBox" class="hidden mt-3 bg-white border border-indigo-100 rounded-2xl p-3.5 text-xs text-slate-600 shadow-sm">
+        <div class="flex items-start justify-between gap-2 mb-1.5">
+          <p class="font-semibold text-slate-800 flex items-center gap-1.5">
+            <span class="inline-block w-2 h-2 rounded-full bg-indigo-500"></span>
+            iPhoneのホーム画面に配置する方法
+          </p>
+          <button type="button" id="closeGuideBtn" class="text-slate-400 hover:text-slate-600 p-0.5" aria-label="閉じる">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <ol class="list-decimal list-inside space-y-1 text-slate-600 leading-relaxed">
+          <li>Safariで本ページを開き、画面下部の<strong class="text-slate-800">共有ボタン（□に↑）</strong>をタップ</li>
+          <li>メニューを下にスクロールし、<strong class="text-slate-800">「ホーム画面に追加」</strong>を選択</li>
+          <li>右上の<strong class="text-slate-800">「追加」</strong>を押すとアプリアイコンが配置されます</li>
+        </ol>
+      </div>
+    </header>
+
+    <!-- 入力フォームセクション群 -->
+    <main class="space-y-4">
+
+      <!-- 2. 時間入力 ("時間") -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2.5">
+          <label for="mealTime" class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            時間
+          </label>
+          <button
+            type="button"
+            id="nowBtn"
+            class="text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-95 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1"
+          >
+            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            現在時刻
+          </button>
+        </div>
+
+        <input
+          type="time"
+          id="mealTime"
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
+        >
+      </section>
+
+      <!-- 3. 食事のタイミング選択 ("タイミング") -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            タイミング
+          </span>
+          <span class="text-[11px] text-slate-400">時間帯から自動選択</span>
+        </div>
+
+        <!-- 4つのセグメントボタン -->
+        <div class="grid grid-cols-4 gap-2" role="group" aria-label="食事のタイミング">
+          <button
+            type="button"
+            data-category="朝食"
+            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
+          >
+            <span>朝食</span>
+          </button>
+          <button
+            type="button"
+            data-category="昼食"
+            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
+          >
+            <span>昼食</span>
+          </button>
+          <button
+            type="button"
+            data-category="間食"
+            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
+          >
+            <span>間食</span>
+          </button>
+          <button
+            type="button"
+            data-category="夕食"
+            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
+          >
+            <span>夕食</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 4. 本日のトレーニング有無 ("本日のトレーニング") -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="mb-2.5">
+          <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            本日のトレーニング
+          </span>
+        </div>
+
+        <!-- 2つのトグルボタン -->
+        <div class="grid grid-cols-2 gap-2.5" role="group" aria-label="本日のトレーニング有無">
+          <button
+            type="button"
+            id="trainYesBtn"
+            data-training="あり"
+            class="training-btn py-3 px-3 rounded-xl text-sm font-semibold border transition active:scale-95 text-center"
+          >
+            あり（筋トレ・運動）
+          </button>
+          <button
+            type="button"
+            id="trainNoBtn"
+            data-training="なし"
+            class="training-btn py-3 px-3 rounded-xl text-sm font-semibold border transition active:scale-95 text-center"
+          >
+            なし（オフ）
+          </button>
+        </div>
+
+        <!-- 「あり」選択時に展開される詳細入力欄 -->
+        <div id="trainingDetailWrapper" class="hidden mt-3">
+          <label for="trainingDetail" class="sr-only">トレーニング内容の詳細</label>
+          <input
+            type="text"
+            id="trainingDetail"
+            placeholder="例：筋トレ40分 / 部位など（空欄可）"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
+          >
+        </div>
+      </section>
+
+      <!-- 5. 食べたもの入力 ("食べたもの") -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2.5">
+          <label for="mealContent" class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            食べたもの
+          </label>
+          <button
+            type="button"
+            id="clearMealBtn"
+            class="text-xs font-medium text-slate-500 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 active:scale-95 px-2.5 py-1.5 rounded-lg transition"
+          >
+            クリア
+          </button>
+        </div>
+
+        <textarea
+          id="mealContent"
+          rows="4"
+          placeholder="例：鶏むね肉のねぎ塩蒸し 200g、ご飯 200g、納豆1パック、プロテイン"
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 placeholder:text-slate-400 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition resize-y"
+        ></textarea>
+      </section>
+
+      <!-- 6. ライブテンプレートプレビュー ("コピーされるテキスト") -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            コピーされるテキスト
+          </span>
+          <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+            リアルタイム更新
+          </span>
+        </div>
+
+        <div class="bg-slate-900 text-slate-100 rounded-xl p-3.5 overflow-x-auto">
+          <pre id="templatePreview" class="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words"></pre>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 7. 固定ボトムCTAバー ("テキストをコピー") -->
+  <div class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-slate-200/80 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] z-30">
+    <div class="max-w-lg mx-auto">
+      <button
+        type="button"
+        id="copyBtn"
+        class="w-full py-3.5 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-base shadow-lg shadow-indigo-600/20 transition-all duration-200 flex items-center justify-center gap-2"
+      >
+        <svg id="copyIcon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+        </svg>
+        <svg id="checkIcon" class="w-5 h-5 shrink-0 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="copyBtnText">テキストをコピー</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- アプリケーションロジック -->
+  <script>
+    (function () {
+      // アプリの状態管理
+      const state = {
+        time: '',
+        category: '朝食',
+        training: 'なし', // 'あり' | 'なし'
+        trainingDetail: '',
+        mealContent: '',
+      };
+
+      // DOM要素の取得
+      const mealTimeInput = document.getElementById('mealTime');
+      const nowBtn = document.getElementById('nowBtn');
+      const categoryBtns = document.querySelectorAll('.category-btn');
+      const trainingBtns = document.querySelectorAll('.training-btn');
+      const trainingDetailWrapper = document.getElementById('trainingDetailWrapper');
+      const trainingDetailInput = document.getElementById('trainingDetail');
+      const mealContentTextarea = document.getElementById('mealContent');
+      const clearMealBtn = document.getElementById('clearMealBtn');
+      const templatePreview = document.getElementById('templatePreview');
+      const copyBtn = document.getElementById('copyBtn');
+      const copyBtnText = document.getElementById('copyBtnText');
+      const copyIcon = document.getElementById('copyIcon');
+      const checkIcon = document.getElementById('checkIcon');
+      const toggleGuideBtn = document.getElementById('toggleGuideBtn');
+      const closeGuideBtn = document.getElementById('closeGuideBtn');
+      const iosGuideBox = document.getElementById('iosGuideBox');
+
+      let copyResetTimer = null;
+
+      /**
+       * 現在時刻を "HH:MM" 形式で取得する
+       */
+      function getCurrentTimeString() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+      }
+
+      /**
+       * 時間帯から食事のタイミングを自動判定する
+       * 05:00-10:59 -> 朝食
+       * 11:00-14:59 -> 昼食
+       * 15:00-17:59 -> 間食
+       * 18:00-04:59 -> 夕食
+       */
+      function detectCategoryByHour(hour) {
+        if (hour >= 5 && hour <= 10) return '朝食';
+        if (hour >= 11 && hour <= 14) return '昼食';
+        if (hour >= 15 && hour <= 17) return '間食';
+        return '夕食';
+      }
+
+      /**
+       * タイミングボタンの選択状態スタイルを更新
+       */
+      function renderCategoryButtons() {
+        categoryBtns.forEach((btn) => {
+          const isSelected = btn.dataset.category === state.category;
+          if (isSelected) {
+            btn.className =
+              'category-btn py-3 px-2 rounded-xl text-sm font-bold border border-indigo-600 bg-indigo-600 text-white shadow-sm transition active:scale-95 flex flex-col items-center justify-center gap-0.5';
+            btn.setAttribute('aria-pressed', 'true');
+          } else {
+            btn.className =
+              'category-btn py-3 px-2 rounded-xl text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition active:scale-95 flex flex-col items-center justify-center gap-0.5';
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+      }
+
+      /**
+       * トレーニングボタンおよび詳細入力欄の表示を更新
+       */
+      function renderTrainingSection() {
+        trainingBtns.forEach((btn) => {
+          const isSelected = btn.dataset.training === state.training;
+          if (isSelected) {
+            btn.className =
+              'training-btn py-3 px-3 rounded-xl text-sm font-bold border border-indigo-600 bg-indigo-600 text-white shadow-sm transition active:scale-95 text-center';
+            btn.setAttribute('aria-pressed', 'true');
+          } else {
+            btn.className =
+              'training-btn py-3 px-3 rounded-xl text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition active:scale-95 text-center';
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+
+        if (state.training === 'あり') {
+          trainingDetailWrapper.classList.remove('hidden');
+        } else {
+          trainingDetailWrapper.classList.add('hidden');
+        }
+      }
+
+      /**
+       * Gemini送信用のフォーマット済みテキストを生成する
+       */
+      function buildReportText() {
+        const displayTime = state.time || getCurrentTimeString();
+
+        // トレーニング行の整形
+        let trainingLine = state.training;
+        if (state.training === 'あり') {
+          const trimmedDetail = state.trainingDetail.trim();
+          if (trimmedDetail) {
+            trainingLine = `あり（${trimmedDetail}）`;
+          }
+        }
+
+        // 食べたもの内容の整形
+        const trimmedMeal = state.mealContent.trim();
+        const mealBody = trimmedMeal ? trimmedMeal : '（未入力）';
+
+        return [
+          '【食事報告】',
+          `・時間：${displayTime}`,
+          `・タイミング：${state.category}`,
+          `・本日のトレーニング：${trainingLine}`,
+          '・食べたもの：',
+          mealBody,
+          '',
+          '上記の食事内容から、おおよその摂取カロリーとPFCバランス（タンパク質・脂質・炭水化物）を計算し、本日のトレーニング有無を踏まえてフィードバックをお願いします。',
+        ].join('\n');
+      }
+
+      /**
+       * ライブプレビュー領域を更新
+       */
+      function updatePreview() {
+        templatePreview.textContent = buildReportText();
+      }
+
+      /**
+       * クリップボードへテキストをコピー（iOS Safari / iFrame両対応）
+       */
+      function copyTextToClipboard(text) {
+        return new Promise((resolve, reject) => {
+          // 1. まず標準の Clipboard API を試行
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard
+              .writeText(text)
+              .then(resolve)
+              .catch(() => {
+                // 失敗時はフォールバックへ
+                fallbackCopy(text) ? resolve() : reject();
+              });
+          } else {
+            // 2. iFrame環境や非セキュア環境向けフォールバック
+            fallbackCopy(text) ? resolve() : reject();
+          }
+        });
+      }
+
+      /**
+       * execCommand('copy') を使った確実なフォールバック処理
+       */
+      function fallbackCopy(text) {
+        try {
+          const tempTextarea = document.createElement('textarea');
+          tempTextarea.value = text;
+          // iOS Safariで画面スクロールやズームが発生しないよう配置
+          tempTextarea.setAttribute('readonly', '');
+          tempTextarea.style.position = 'fixed';
+          tempTextarea.style.top = '0';
+          tempTextarea.style.left = '-9999px';
+          tempTextarea.style.fontSize = '16px';
+          document.body.appendChild(tempTextarea);
+
+          tempTextarea.focus();
+          tempTextarea.select();
+          tempTextarea.setSelectionRange(0, tempTextarea.value.length);
+
+          const successful = document.execCommand('copy');
+          document.body.removeChild(tempTextarea);
+          return successful;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      /**
+       * コピー完了時のボタンビジュアルフィードバック（2秒間）
+       */
+      function showCopySuccessFeedback() {
+        if (copyResetTimer) {
+          clearTimeout(copyResetTimer);
+        }
+
+        // エメラルドグリーンに変更
+        copyBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'shadow-indigo-600/20');
+        copyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-600/25');
+        copyIcon.classList.add('hidden');
+        checkIcon.classList.remove('hidden');
+        copyBtnText.textContent = 'コピーしました！Geminiに貼り付け';
+
+        copyResetTimer = setTimeout(() => {
+          copyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-600/25');
+          copyBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'shadow-indigo-600/20');
+          checkIcon.classList.add('hidden');
+          copyIcon.classList.remove('hidden');
+          copyBtnText.textContent = 'テキストをコピー';
+        }, 2000);
+      }
+
+      // --- イベントリスナーの登録 ---
+
+      // 時間入力の変更
+      mealTimeInput.addEventListener('input', (e) => {
+        state.time = e.target.value;
+        updatePreview();
+      });
+
+      // 「現在時刻」ボタンクリック
+      nowBtn.addEventListener('click', () => {
+        const nowStr = getCurrentTimeString();
+        state.time = nowStr;
+        mealTimeInput.value = nowStr;
+        updatePreview();
+      });
+
+      // タイミング選択ボタンクリック
+      categoryBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.category = btn.dataset.category;
+          renderCategoryButtons();
+          updatePreview();
+        });
+      });
+
+      // トレーニング有無ボタンクリック
+      trainingBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.training = btn.dataset.training;
+          renderTrainingSection();
+          updatePreview();
+          if (state.training === 'あり') {
+            trainingDetailInput.focus();
+          }
+        });
+      });
+
+      // トレーニング詳細入力
+      trainingDetailInput.addEventListener('input', (e) => {
+        state.trainingDetail = e.target.value;
+        updatePreview();
+      });
+
+      // 食べたものテキストエリア入力
+      mealContentTextarea.addEventListener('input', (e) => {
+        state.mealContent = e.target.value;
+        updatePreview();
+      });
+
+      // 「クリア」ボタンクリック
+      clearMealBtn.addEventListener('click', () => {
+        state.mealContent = '';
+        mealContentTextarea.value = '';
+        updatePreview();
+        mealContentTextarea.focus();
+      });
+
+      // 「テキストをコピー」ボタンクリック
+      copyBtn.addEventListener('click', () => {
+        const textToCopy = buildReportText();
+        copyTextToClipboard(textToCopy).then(() => {
+          showCopySuccessFeedback();
+        });
+      });
+
+      // iPhoneホーム画面追加ガイドの開閉
+      toggleGuideBtn.addEventListener('click', () => {
+        const isHidden = iosGuideBox.classList.contains('hidden');
+        iosGuideBox.classList.toggle('hidden');
+        toggleGuideBtn.setAttribute('aria-expanded', String(isHidden));
+      });
+
+      closeGuideBtn.addEventListener('click', () => {
+        iosGuideBox.classList.add('hidden');
+        toggleGuideBtn.setAttribute('aria-expanded', 'false');
+      });
+
+      // --- 初期化処理 ---
+      function init() {
+        const now = new Date();
+        state.time = getCurrentTimeString();
+        state.category = detectCategoryByHour(now.getHours());
+
+        mealTimeInput.value = state.time;
+        renderCategoryButtons();
+        renderTrainingSection();
+        updatePreview();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
