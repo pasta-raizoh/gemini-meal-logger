@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>Gemini 食事報告メーカー</title>
+  <title>Gemini 食事・トレ報告メーカー</title>
 
-  <!-- iOS ホーム画面追加 (PWA) 用メタタグ -->
+  <!-- iPhone Safari ホーム画面追加 (PWA) 用メタタグ -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="食事報告">
-  <meta name="theme-color" content="#f8fafc">
+  <meta name="apple-mobile-web-app-title" content="食事・トレ報告">
+  <meta name="theme-color" content="#ffffff">
 
-  <!-- アプリアイコン (SVGデータURI) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f46e5'/%3E%3Cpath d='M50 22c2 14 14 26 28 28-14 2-26 14-28 28-2-14-14-26-28-28 14-2 26-14 28-28z' fill='%23ffffff'/%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f46e5'/%3E%3Cpath d='M50 22c2 14 14 26 28 28-14 2-26 14-28 28-2-14-14-26-28-28 14-2 26-14 28-28z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <!-- アプリアイコン (インラインSVGデータURI) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23059669'/%3E%3Cstop offset='100%25' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Cpath d='M50 22c2 14 14 26 28 28-14 2-26 14-28 28-2-14-14-26-28-28 14-2 26-14 28-28z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23059669'/%3E%3Cstop offset='100%25' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Cpath d='M50 22c2 14 14 26 28 28-14 2-26 14-28 28-2-14-14-26-28-28 14-2 26-14 28-28z' fill='%23ffffff'/%3E%3C/svg%3E">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -36,119 +36,125 @@
   </script>
 
   <style>
-    /* iOS Safariでのフォーカス時自動ズーム防止のため入力欄は16px以上を確保 */
+    /* iOS Safariでの入力フォーカス時自動ズーム防止のため16px以上を確保 */
     input, textarea, select {
       font-size: 16px !important;
     }
 
-    /* タップ時のハイライト抑制と滑らかなアニメーション */
     * {
       -webkit-tap-highlight-color: transparent;
     }
-
-    /* スムーズなアコーディオン展開用 */
-    .slide-panel {
-      transition: max-height 0.25s ease-out, opacity 0.2s ease-out, margin-top 0.2s ease-out;
-      overflow: hidden;
-    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
 
-  <!-- メインコンテナ (モバイルファースト幅制限) -->
-  <div class="w-full max-w-lg mx-auto px-4 pt-5 pb-32 flex-1">
-
-    <!-- 1. ヘッダー -->
-    <header class="mb-5">
-      <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2.5">
-          <!-- Gemini風スパークルアイコン -->
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <!-- スティッキー・ヘッダー＆トップナビゲーションタブ -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
+    <div class="w-full max-w-md mx-auto px-4 pt-3.5 pb-3">
+      <!-- アプリタイトル行 -->
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-sm shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 2C12.7 7.2 16.8 11.3 22 12C16.8 12.7 12.7 16.8 12 22C11.3 16.8 7.2 12.7 2 12C7.2 11.3 11.3 7.2 12 2Z" />
             </svg>
           </div>
-          <div>
-            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
-              Gemini 食事報告メーカー
-            </h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-              食べたものを入力してワンタップで報告文を作成
-            </p>
-          </div>
+          <h1 class="text-base font-bold tracking-tight text-slate-900 truncate">
+            Gemini 食事・トレ報告メーカー
+          </h1>
         </div>
 
-        <!-- ホーム画面追加ガイドボタン -->
+        <!-- ホーム追加ガイドモーダル起動ボタン -->
         <button
           type="button"
-          id="toggleGuideBtn"
-          aria-expanded="false"
-          class="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:scale-95 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shrink-0"
+          id="openIosGuideBtn"
+          class="min-h-[44px] text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 px-3 py-2 rounded-xl transition flex items-center gap-1.5 shrink-0"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
           <span>ホーム追加</span>
         </button>
       </div>
 
-      <!-- iPhoneホーム画面追加ガイド（折りたたみ式） -->
-      <div id="iosGuideBox" class="hidden mt-3 bg-white border border-indigo-100 rounded-2xl p-3.5 text-xs text-slate-600 shadow-sm">
-        <div class="flex items-start justify-between gap-2 mb-1.5">
-          <p class="font-semibold text-slate-800 flex items-center gap-1.5">
-            <span class="inline-block w-2 h-2 rounded-full bg-indigo-500"></span>
-            iPhoneのホーム画面に配置する方法
-          </p>
-          <button type="button" id="closeGuideBtn" class="text-slate-400 hover:text-slate-600 p-0.5" aria-label="閉じる">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <ol class="list-decimal list-inside space-y-1 text-slate-600 leading-relaxed">
-          <li>Safariで本ページを開き、画面下部の<strong class="text-slate-800">共有ボタン（□に↑）</strong>をタップ</li>
-          <li>メニューを下にスクロールし、<strong class="text-slate-800">「ホーム画面に追加」</strong>を選択</li>
-          <li>右上の<strong class="text-slate-800">「追加」</strong>を押すとアプリアイコンが配置されます</li>
-        </ol>
-      </div>
-    </header>
+      <!-- トップタブスイッチャー -->
+      <nav class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl" role="tablist" aria-label="報告モード切り替え">
+        <button
+          type="button"
+          id="tabMealBtn"
+          role="tab"
+          aria-selected="true"
+          class="min-h-[44px] py-2.5 px-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-emerald-700 shadow-sm"
+        >
+          <span>🍽️ 食事報告</span>
+        </button>
+        <button
+          type="button"
+          id="tabWorkoutBtn"
+          role="tab"
+          aria-selected="false"
+          class="min-h-[44px] py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900"
+        >
+          <span>💪 トレーニング報告</span>
+        </button>
+      </nav>
+    </div>
+  </header>
 
-    <!-- 入力フォームセクション群 -->
-    <main class="space-y-4">
+  <!-- メインコンテンツ領域 -->
+  <div class="w-full max-w-md mx-auto px-4 pt-4 pb-32 flex-1">
 
-      <!-- 2. 時間入力 ("時間") -->
+    <!-- ==========================================
+         ページ1: 🍽️ 食事報告 (Meal Report)
+    =========================================== -->
+    <main id="mealPage" class="space-y-4">
+
+      <!-- 1. 日時入力カード -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
-        <div class="flex items-center justify-between mb-2.5">
-          <label for="mealTime" class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            時間
-          </label>
+            日時
+          </span>
           <button
             type="button"
-            id="nowBtn"
-            class="text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-95 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1"
+            id="mealNowDateTimeBtn"
+            class="min-h-[44px] text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5"
           >
-            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            現在時刻
+            <span>現在日時</span>
           </button>
         </div>
 
-        <input
-          type="time"
-          id="mealTime"
-          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
-        >
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label for="mealDate" class="block text-[11px] font-medium text-slate-500 mb-1">日付</label>
+            <input
+              type="date"
+              id="mealDate"
+              class="w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+            >
+          </div>
+          <div>
+            <label for="mealTime" class="block text-[11px] font-medium text-slate-500 mb-1">時間</label>
+            <input
+              type="time"
+              id="mealTime"
+              class="w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+            >
+          </div>
+        </div>
       </section>
 
-      <!-- 3. 食事のタイミング選択 ("タイミング") -->
+      <!-- 2. タイミング（朝食・昼食・間食・夕食）選択 -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             タイミング
@@ -156,137 +162,248 @@
           <span class="text-[11px] text-slate-400">時間帯から自動選択</span>
         </div>
 
-        <!-- 4つのセグメントボタン -->
         <div class="grid grid-cols-4 gap-2" role="group" aria-label="食事のタイミング">
-          <button
-            type="button"
-            data-category="朝食"
-            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
-          >
-            <span>朝食</span>
-          </button>
-          <button
-            type="button"
-            data-category="昼食"
-            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
-          >
-            <span>昼食</span>
-          </button>
-          <button
-            type="button"
-            data-category="間食"
-            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
-          >
-            <span>間食</span>
-          </button>
-          <button
-            type="button"
-            data-category="夕食"
-            class="category-btn py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5"
-          >
-            <span>夕食</span>
-          </button>
+          <button type="button" data-category="朝食" class="category-btn min-h-[44px] py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95">朝食</button>
+          <button type="button" data-category="昼食" class="category-btn min-h-[44px] py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95">昼食</button>
+          <button type="button" data-category="間食" class="category-btn min-h-[44px] py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95">間食</button>
+          <button type="button" data-category="夕食" class="category-btn min-h-[44px] py-3 px-2 rounded-xl text-sm font-semibold border transition active:scale-95">夕食</button>
         </div>
       </section>
 
-      <!-- 4. 本日のトレーニング有無 ("本日のトレーニング") -->
+      <!-- 3. 本日のトレーニング有無 -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
-        <div class="mb-2.5">
+        <div class="flex items-center justify-between mb-2.5">
           <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            本日のトレーニング
+            本日のトレーニング有無
           </span>
         </div>
 
-        <!-- 2つのトグルボタン -->
         <div class="grid grid-cols-2 gap-2.5" role="group" aria-label="本日のトレーニング有無">
-          <button
-            type="button"
-            id="trainYesBtn"
-            data-training="あり"
-            class="training-btn py-3 px-3 rounded-xl text-sm font-semibold border transition active:scale-95 text-center"
-          >
-            あり（筋トレ・運動）
+          <button type="button" data-training="なし" class="training-btn min-h-[44px] py-3 px-3 rounded-xl text-sm font-semibold border transition active:scale-95 text-center">
+            なし
           </button>
-          <button
-            type="button"
-            id="trainNoBtn"
-            data-training="なし"
-            class="training-btn py-3 px-3 rounded-xl text-sm font-semibold border transition active:scale-95 text-center"
-          >
-            なし（オフ）
+          <button type="button" data-training="あり（筋トレ・有酸素）" class="training-btn min-h-[44px] py-3 px-3 rounded-xl text-xs sm:text-sm font-semibold border transition active:scale-95 text-center">
+            あり（筋トレ・有酸素）
           </button>
-        </div>
-
-        <!-- 「あり」選択時に展開される詳細入力欄 -->
-        <div id="trainingDetailWrapper" class="hidden mt-3">
-          <label for="trainingDetail" class="sr-only">トレーニング内容の詳細</label>
-          <input
-            type="text"
-            id="trainingDetail"
-            placeholder="例：筋トレ40分 / 部位など（空欄可）"
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
-          >
         </div>
       </section>
 
-      <!-- 5. 食べたもの入力 ("食べたもの") -->
+      <!-- 4. 食べたものを記入（localStorage非保存・起動時は空欄） -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
         <div class="flex items-center justify-between mb-2.5">
           <label for="mealContent" class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             食べたもの
           </label>
-          <button
-            type="button"
-            id="clearMealBtn"
-            class="text-xs font-medium text-slate-500 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 active:scale-95 px-2.5 py-1.5 rounded-lg transition"
-          >
-            クリア
-          </button>
         </div>
 
         <textarea
           id="mealContent"
           rows="4"
-          placeholder="例：鶏むね肉のねぎ塩蒸し 200g、ご飯 200g、納豆1パック、プロテイン"
-          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 placeholder:text-slate-400 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition resize-y"
+          placeholder="例：鶏むね肉の塩麹焼き 200g、白米 180g、味噌汁、プロテイン"
+          class="w-full min-h-[112px] bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 placeholder:text-slate-400 leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition resize-y"
         ></textarea>
       </section>
 
-      <!-- 6. ライブテンプレートプレビュー ("コピーされるテキスト") -->
+      <!-- 5. ライブプレビュー（食事報告） -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            コピーされるテキスト
+            コピー用プレビュー
           </span>
-          <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-            リアルタイム更新
+          <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+            Gemini最適化フォーマット
           </span>
         </div>
 
         <div class="bg-slate-900 text-slate-100 rounded-xl p-3.5 overflow-x-auto">
-          <pre id="templatePreview" class="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words"></pre>
+          <pre id="mealPreview" class="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words"></pre>
         </div>
       </section>
 
     </main>
+
+    <!-- ==========================================
+         ページ2: 💪 トレーニング報告 (Workout Report)
+    =========================================== -->
+    <main id="workoutPage" class="hidden space-y-3.5">
+
+      <!-- 自動保存＆チェックボックス挙動の案内バナー -->
+      <div class="bg-emerald-50/90 border border-emerald-200/80 rounded-2xl px-3.5 py-2.5 flex items-start gap-2">
+        <svg class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-xs font-medium text-emerald-900 leading-relaxed">
+          ※重量・回数は自動保存されます。チェックを入れた種目のみ報告文に反映されます
+        </p>
+      </div>
+
+      <!-- 日時入力カード（食事報告と同じレイアウト） -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            日時
+          </span>
+          <button
+            type="button"
+            id="workoutNowDateTimeBtn"
+            class="min-h-[44px] text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>現在日時</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label for="workoutDate" class="block text-[11px] font-medium text-slate-500 mb-1">日付</label>
+            <input
+              type="date"
+              id="workoutDate"
+              class="w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+            >
+          </div>
+          <div>
+            <label for="workoutTime" class="block text-[11px] font-medium text-slate-500 mb-1">時間</label>
+            <input
+              type="time"
+              id="workoutTime"
+              class="w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- 固定マシン6種目 ＋ 有酸素 ＋ その他（記入）カード一覧 -->
+      <div id="exerciseListContainer" class="space-y-3"></div>
+
+      <!-- ＋ その他種目を追加ボタン -->
+      <button
+        type="button"
+        id="addCustomExerciseBtn"
+        class="w-full min-h-[44px] py-3 px-4 rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-500 bg-white hover:bg-emerald-50/40 active:scale-[0.99] text-slate-700 font-semibold text-sm transition flex items-center justify-center gap-1.5"
+      >
+        <span>＋ その他種目を追加</span>
+      </button>
+
+      <!-- ライブプレビュー（トレーニング報告） -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            コピー用プレビュー
+          </span>
+          <span id="loggedExerciseCountBadge" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+            0種目選択中
+          </span>
+        </div>
+
+        <div class="bg-slate-900 text-slate-100 rounded-xl p-3.5 overflow-x-auto">
+          <pre id="workoutPreview" class="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words"></pre>
+        </div>
+      </section>
+
+    </main>
+
   </div>
 
-  <!-- 7. 固定ボトムCTAバー ("テキストをコピー") -->
-  <div class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-slate-200/80 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] z-30">
-    <div class="max-w-lg mx-auto">
+  <!-- モーダル: iPhoneホーム画面追加ガイド -->
+  <div
+    id="iosGuideModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="iosGuideModalTitle"
+  >
+    <div class="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-200">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 id="iosGuideModalTitle" class="text-base font-bold text-slate-900">iPhoneホーム画面への追加</h2>
+            <p class="text-xs text-slate-500">アプリのようにワンタップで起動できます</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          id="closeIosGuideXBtn"
+          aria-label="閉じる"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-xl transition"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <ol class="space-y-2.5 text-xs sm:text-sm text-slate-700 bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 mb-4 leading-relaxed">
+        <li class="flex gap-2">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+          <span>iPhoneの <strong>Safari</strong> でこのページを開きます（Chrome等は非対応）。</span>
+        </li>
+        <li class="flex gap-2">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+          <span>画面下部の <strong>共有ボタン（四角に上矢印 □↑）</strong> をタップします。</span>
+        </li>
+        <li class="flex gap-2">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+          <span>メニューを下にスクロールし、<strong>「ホーム画面に追加」→「追加」</strong> を押して完了です。</span>
+        </li>
+      </ol>
+
+      <button
+        type="button"
+        id="closeIosGuideBtn"
+        class="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-sm transition"
+      >
+        閉じる
+      </button>
+    </div>
+  </div>
+
+  <!-- コピー成功トースト通知 -->
+  <div
+    id="copyToast"
+    role="status"
+    aria-live="polite"
+    class="pointer-events-none fixed bottom-24 inset-x-0 z-40 flex justify-center px-4 opacity-0 translate-y-2 transition-all duration-200"
+  >
+    <div class="bg-slate-900/95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full shadow-xl border border-slate-700/80 flex items-center gap-2">
+      <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </span>
+      <span>コピーしました！Geminiに貼り付けて送信できます</span>
+    </div>
+  </div>
+
+  <!-- 固定ボトムCTAバー -->
+  <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] z-30">
+    <div class="max-w-md mx-auto">
       <button
         type="button"
         id="copyBtn"
-        class="w-full py-3.5 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-base shadow-lg shadow-indigo-600/20 transition-all duration-200 flex items-center justify-center gap-2"
+        class="w-full min-h-[48px] py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2"
       >
         <svg id="copyIcon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -299,40 +416,177 @@
     </div>
   </div>
 
-  <!-- アプリケーションロジック -->
+  <!-- アプリケーションロジック（トレーニング履歴のlocalStorage自動保存・復元対応） -->
   <script>
     (function () {
-      // アプリの状態管理
+      const STORAGE_KEY = 'gemini_meal_workout_tracker_v1';
+
+      // デフォルトの固定マシン6種目（指定順）
+      const DEFAULT_STRENGTH_EXERCISES = [
+        { id: 'chest_press', name: 'チェストプレス' },
+        { id: 'shoulder_press', name: 'ショルダープレス' },
+        { id: 'lat_pulldown', name: 'ラットプルダウン' },
+        { id: 'leg_press', name: 'レッグプレス' },
+        { id: 'adduction', name: 'アダクション' },
+        { id: 'abdominal', name: 'アブドミナル' },
+      ];
+
+      // アプリ状態（workout内の種目・重量・回数・チェック状態のみlocalStorageへ永続化）
       const state = {
-        time: '',
-        category: '朝食',
-        training: 'なし', // 'あり' | 'なし'
-        trainingDetail: '',
-        mealContent: '',
+        activeTab: 'meal', // 'meal' | 'workout'
+        meal: {
+          date: '',
+          time: '',
+          category: '朝食',
+          training: 'なし', // 'なし' | 'あり（筋トレ・有酸素）'
+          content: '', // 毎食内容が異なるためlocalStorage非保存
+        },
+        workout: {
+          date: '',
+          time: '',
+          strength: {
+            chest_press: { checked: false, weight: '', reps: '' },
+            shoulder_press: { checked: false, weight: '', reps: '' },
+            lat_pulldown: { checked: false, weight: '', reps: '' },
+            leg_press: { checked: false, weight: '', reps: '' },
+            adduction: { checked: false, weight: '', reps: '' },
+            abdominal: { checked: false, weight: '', reps: '' },
+          },
+          cardio: {
+            checked: false,
+            text: '',
+          },
+          customs: [
+            { id: 'custom_1', checked: false, name: '', detail: '' },
+          ],
+        },
       };
 
-      // DOM要素の取得
+      // DOM要素取得
+      const tabMealBtn = document.getElementById('tabMealBtn');
+      const tabWorkoutBtn = document.getElementById('tabWorkoutBtn');
+      const mealPage = document.getElementById('mealPage');
+      const workoutPage = document.getElementById('workoutPage');
+
+      // ホーム追加ガイドモーダル要素
+      const openIosGuideBtn = document.getElementById('openIosGuideBtn');
+      const iosGuideModal = document.getElementById('iosGuideModal');
+      const closeIosGuideXBtn = document.getElementById('closeIosGuideXBtn');
+      const closeIosGuideBtn = document.getElementById('closeIosGuideBtn');
+
+      // 食事ページ要素
+      const mealDateInput = document.getElementById('mealDate');
       const mealTimeInput = document.getElementById('mealTime');
-      const nowBtn = document.getElementById('nowBtn');
+      const mealNowDateTimeBtn = document.getElementById('mealNowDateTimeBtn');
       const categoryBtns = document.querySelectorAll('.category-btn');
       const trainingBtns = document.querySelectorAll('.training-btn');
-      const trainingDetailWrapper = document.getElementById('trainingDetailWrapper');
-      const trainingDetailInput = document.getElementById('trainingDetail');
       const mealContentTextarea = document.getElementById('mealContent');
-      const clearMealBtn = document.getElementById('clearMealBtn');
-      const templatePreview = document.getElementById('templatePreview');
+      const mealPreview = document.getElementById('mealPreview');
+
+      // トレーニングページ要素
+      const workoutDateInput = document.getElementById('workoutDate');
+      const workoutTimeInput = document.getElementById('workoutTime');
+      const workoutNowDateTimeBtn = document.getElementById('workoutNowDateTimeBtn');
+      const exerciseListContainer = document.getElementById('exerciseListContainer');
+      const addCustomExerciseBtn = document.getElementById('addCustomExerciseBtn');
+      const workoutPreview = document.getElementById('workoutPreview');
+      const loggedExerciseCountBadge = document.getElementById('loggedExerciseCountBadge');
+
+      // ボトムCTAコピーボタン＆トースト通知要素
       const copyBtn = document.getElementById('copyBtn');
       const copyBtnText = document.getElementById('copyBtnText');
       const copyIcon = document.getElementById('copyIcon');
       const checkIcon = document.getElementById('checkIcon');
-      const toggleGuideBtn = document.getElementById('toggleGuideBtn');
-      const closeGuideBtn = document.getElementById('closeGuideBtn');
-      const iosGuideBox = document.getElementById('iosGuideBox');
+      const copyToast = document.getElementById('copyToast');
 
       let copyResetTimer = null;
 
       /**
-       * 現在時刻を "HH:MM" 形式で取得する
+       * トレーニングデータ（重量・回数・有酸素・その他種目・チェック状態）をlocalStorageへ自動保存
+       */
+      function saveWorkoutToStorage() {
+        try {
+          const payload = {
+            strength: state.workout.strength,
+            cardio: state.workout.cardio,
+            customs: state.workout.customs,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } catch (err) {
+          // プライベートブラウズや容量制限時もアプリが停止しないよう安全に無視
+        }
+      }
+
+      /**
+       * 起動時にlocalStorageから前回のトレーニング記録・チェック状態を復元
+       */
+      function loadWorkoutFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return;
+
+          // 固定6種目の復元
+          if (parsed.strength && typeof parsed.strength === 'object') {
+            DEFAULT_STRENGTH_EXERCISES.forEach((ex) => {
+              const savedItem = parsed.strength[ex.id];
+              if (savedItem && typeof savedItem === 'object') {
+                state.workout.strength[ex.id] = {
+                  checked: Boolean(savedItem.checked),
+                  weight: typeof savedItem.weight === 'string' ? savedItem.weight : '',
+                  reps: typeof savedItem.reps === 'string' ? savedItem.reps : '',
+                };
+              }
+            });
+          }
+
+          // 有酸素運動の復元
+          if (parsed.cardio && typeof parsed.cardio === 'object') {
+            state.workout.cardio = {
+              checked: Boolean(parsed.cardio.checked),
+              text: typeof parsed.cardio.text === 'string' ? parsed.cardio.text : '',
+            };
+          }
+
+          // その他種目リストの復元
+          if (Array.isArray(parsed.customs)) {
+            if (parsed.customs.length > 0) {
+              state.workout.customs = parsed.customs.map((item, idx) => ({
+                id: typeof item.id === 'string' && item.id ? item.id : `custom_restored_${idx}`,
+                checked: Boolean(item.checked),
+                name: typeof item.name === 'string' ? item.name : '',
+                detail: typeof item.detail === 'string' ? item.detail : '',
+              }));
+            } else {
+              state.workout.customs = [];
+            }
+          }
+        } catch (err) {
+          // 破損データがあった場合は初期値のまま安全に続行
+        }
+      }
+
+      /**
+       * ローカルタイムゾーンで今日の日付を "YYYY-MM-DD" 形式で取得
+       */
+      function getTodayDateString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+
+      /**
+       * "YYYY-MM-DD" を出力テンプレート用の "YYYY/MM/DD" 形式へ変換
+       */
+      function formatDateSlash(dateStr) {
+        return String(dateStr || '').replace(/-/g, '/');
+      }
+
+      /**
+       * 現在時刻を "HH:MM" 形式で取得
        */
       function getCurrentTimeString() {
         const now = new Date();
@@ -342,11 +596,7 @@
       }
 
       /**
-       * 時間帯から食事のタイミングを自動判定する
-       * 05:00-10:59 -> 朝食
-       * 11:00-14:59 -> 昼食
-       * 15:00-17:59 -> 間食
-       * 18:00-04:59 -> 夕食
+       * 時間帯からタイミング（朝食・昼食・間食・夕食）を自動判定
        */
       function detectCategoryByHour(hour) {
         if (hour >= 5 && hour <= 10) return '朝食';
@@ -356,114 +606,436 @@
       }
 
       /**
-       * タイミングボタンの選択状態スタイルを更新
+       * HTMLエスケープ用ヘルパー
+       */
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      /**
+       * コピーボタンおよびトースト通知の表示をリセット
+       */
+      function resetCopyFeedback() {
+        checkIcon.classList.add('hidden');
+        copyIcon.classList.remove('hidden');
+        copyBtnText.textContent = 'テキストをコピー';
+        copyBtn.className =
+          'w-full min-h-[48px] py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2';
+
+        copyToast.classList.add('opacity-0', 'translate-y-2');
+        copyToast.classList.remove('opacity-100', 'translate-y-0');
+      }
+
+      /**
+       * トップナビゲーションタブの切り替え
+       */
+      function switchTab(tabName) {
+        state.activeTab = tabName;
+
+        if (copyResetTimer) {
+          clearTimeout(copyResetTimer);
+          copyResetTimer = null;
+        }
+        resetCopyFeedback();
+
+        if (tabName === 'meal') {
+          mealPage.classList.remove('hidden');
+          workoutPage.classList.add('hidden');
+
+          tabMealBtn.className =
+            'min-h-[44px] py-2.5 px-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-emerald-700 shadow-sm';
+          tabMealBtn.setAttribute('aria-selected', 'true');
+
+          tabWorkoutBtn.className =
+            'min-h-[44px] py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
+          tabWorkoutBtn.setAttribute('aria-selected', 'false');
+        } else {
+          mealPage.classList.add('hidden');
+          workoutPage.classList.remove('hidden');
+
+          tabWorkoutBtn.className =
+            'min-h-[44px] py-2.5 px-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-emerald-700 shadow-sm';
+          tabWorkoutBtn.setAttribute('aria-selected', 'true');
+
+          tabMealBtn.className =
+            'min-h-[44px] py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
+          tabMealBtn.setAttribute('aria-selected', 'false');
+        }
+      }
+
+      /**
+       * 食事タイミングボタンの選択状態描画
        */
       function renderCategoryButtons() {
         categoryBtns.forEach((btn) => {
-          const isSelected = btn.dataset.category === state.category;
+          const isSelected = btn.dataset.category === state.meal.category;
           if (isSelected) {
             btn.className =
-              'category-btn py-3 px-2 rounded-xl text-sm font-bold border border-indigo-600 bg-indigo-600 text-white shadow-sm transition active:scale-95 flex flex-col items-center justify-center gap-0.5';
+              'category-btn min-h-[44px] py-3 px-2 rounded-xl text-sm font-bold border border-emerald-600 bg-emerald-600 text-white shadow-sm transition active:scale-95';
             btn.setAttribute('aria-pressed', 'true');
           } else {
             btn.className =
-              'category-btn py-3 px-2 rounded-xl text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition active:scale-95 flex flex-col items-center justify-center gap-0.5';
+              'category-btn min-h-[44px] py-3 px-2 rounded-xl text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition active:scale-95';
             btn.setAttribute('aria-pressed', 'false');
           }
         });
       }
 
       /**
-       * トレーニングボタンおよび詳細入力欄の表示を更新
+       * 本日のトレーニング有無ボタンの選択状態描画
        */
-      function renderTrainingSection() {
+      function renderTrainingButtons() {
         trainingBtns.forEach((btn) => {
-          const isSelected = btn.dataset.training === state.training;
+          const isSelected = btn.dataset.training === state.meal.training;
           if (isSelected) {
-            btn.className =
-              'training-btn py-3 px-3 rounded-xl text-sm font-bold border border-indigo-600 bg-indigo-600 text-white shadow-sm transition active:scale-95 text-center';
+            const activeColors =
+              state.meal.training !== 'なし'
+                ? 'border-emerald-600 bg-emerald-600 text-white'
+                : 'border-slate-700 bg-slate-700 text-white';
+            btn.className = `training-btn min-h-[44px] py-3 px-3 rounded-xl text-xs sm:text-sm font-bold border ${activeColors} shadow-sm transition active:scale-95 text-center`;
             btn.setAttribute('aria-pressed', 'true');
           } else {
             btn.className =
-              'training-btn py-3 px-3 rounded-xl text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition active:scale-95 text-center';
+              'training-btn min-h-[44px] py-3 px-3 rounded-xl text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition active:scale-95 text-center';
             btn.setAttribute('aria-pressed', 'false');
           }
         });
-
-        if (state.training === 'あり') {
-          trainingDetailWrapper.classList.remove('hidden');
-        } else {
-          trainingDetailWrapper.classList.add('hidden');
-        }
       }
 
       /**
-       * Gemini送信用のフォーマット済みテキストを生成する
+       * 食事報告のコピー用テキスト生成
        */
-      function buildReportText() {
-        const displayTime = state.time || getCurrentTimeString();
-
-        // トレーニング行の整形
-        let trainingLine = state.training;
-        if (state.training === 'あり') {
-          const trimmedDetail = state.trainingDetail.trim();
-          if (trimmedDetail) {
-            trainingLine = `あり（${trimmedDetail}）`;
-          }
-        }
-
-        // 食べたもの内容の整形
-        const trimmedMeal = state.mealContent.trim();
-        const mealBody = trimmedMeal ? trimmedMeal : '（未入力）';
+      function buildMealReportText() {
+        const displayDate = formatDateSlash(state.meal.date || getTodayDateString());
+        const displayTime = state.meal.time || getCurrentTimeString();
+        const trimmedContent = state.meal.content.trim();
+        const bodyText = trimmedContent ? trimmedContent : '（未入力）';
 
         return [
           '【食事報告】',
-          `・時間：${displayTime}`,
-          `・タイミング：${state.category}`,
-          `・本日のトレーニング：${trainingLine}`,
+          `・日時：${displayDate} ${displayTime}`,
+          `・タイミング：${state.meal.category}`,
+          `・トレーニング有無：${state.meal.training}`,
           '・食べたもの：',
-          mealBody,
-          '',
-          '上記の食事内容から、おおよその摂取カロリーとPFCバランス（タンパク質・脂質・炭水化物）を計算し、本日のトレーニング有無を踏まえてフィードバックをお願いします。',
+          bodyText,
         ].join('\n');
       }
 
       /**
-       * ライブプレビュー領域を更新
+       * 食事ライブプレビュー更新
        */
-      function updatePreview() {
-        templatePreview.textContent = buildReportText();
+      function updateMealPreview() {
+        mealPreview.textContent = buildMealReportText();
       }
 
       /**
-       * クリップボードへテキストをコピー（iOS Safari / iFrame両対応）
+       * カード選択状態に応じたステータスバッジHTMLを返す
+       */
+      function getStatusBadgeHtml(isChecked) {
+        return isChecked
+          ? '<span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">報告対象</span>'
+          : '<span class="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">対象外</span>';
+      }
+
+      /**
+       * トレーニングページの種目カード一覧を描画
+       */
+      function renderExerciseCards() {
+        const cards = [];
+
+        // 1〜6: 固定マシン種目
+        DEFAULT_STRENGTH_EXERCISES.forEach((ex, idx) => {
+          const data = state.workout.strength[ex.id];
+          const isChecked = Boolean(data.checked);
+          const cardBorderClass = isChecked
+            ? 'border-emerald-600 ring-1 ring-emerald-600/15'
+            : 'border-slate-200/80';
+
+          cards.push(`
+            <section data-card-id="${ex.id}" class="bg-white rounded-2xl p-4 shadow-sm border ${cardBorderClass} transition">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <label class="min-h-[44px] flex items-center gap-2.5 cursor-pointer select-none pr-2">
+                  <input
+                    type="checkbox"
+                    data-check-type="strength"
+                    data-target-id="${ex.id}"
+                    aria-label="${escapeHtml(ex.name)}を今回の報告に含める"
+                    ${isChecked ? 'checked' : ''}
+                    class="workout-check w-5 h-5 rounded-md border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
+                  >
+                  <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center shrink-0">${idx + 1}</span>
+                  <span class="text-sm font-bold text-slate-900">${escapeHtml(ex.name)}</span>
+                </label>
+                <div class="card-status-badge shrink-0">${getStatusBadgeHtml(isChecked)}</div>
+              </div>
+
+              <div class="grid grid-cols-12 gap-2.5">
+                <div class="col-span-5">
+                  <label class="block text-[11px] font-medium text-slate-500 mb-1">重量 (kg)</label>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    data-strength-id="${ex.id}"
+                    data-field="weight"
+                    value="${escapeHtml(data.weight)}"
+                    placeholder="例: 40"
+                    class="workout-input w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                  >
+                </div>
+                <div class="col-span-7">
+                  <label class="block text-[11px] font-medium text-slate-500 mb-1">回数</label>
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    data-strength-id="${ex.id}"
+                    data-field="reps"
+                    value="${escapeHtml(data.reps)}"
+                    placeholder="例: 10回（3セット）"
+                    class="workout-input w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                  >
+                </div>
+              </div>
+            </section>
+          `);
+        });
+
+        // 7: 有酸素運動カード
+        const cardioChecked = Boolean(state.workout.cardio.checked);
+        const cardioBorderClass = cardioChecked
+          ? 'border-emerald-600 ring-1 ring-emerald-600/15'
+          : 'border-slate-200/80';
+
+        cards.push(`
+          <section data-card-id="cardio" class="bg-white rounded-2xl p-4 shadow-sm border ${cardioBorderClass} transition">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <label class="min-h-[44px] flex items-center gap-2.5 cursor-pointer select-none pr-2">
+                <input
+                  type="checkbox"
+                  data-check-type="cardio"
+                  data-target-id="cardio"
+                  aria-label="有酸素を今回の報告に含める"
+                  ${cardioChecked ? 'checked' : ''}
+                  class="workout-check w-5 h-5 rounded-md border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
+                >
+                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center shrink-0">7</span>
+                <span class="text-sm font-bold text-slate-900">有酸素</span>
+              </label>
+              <div class="card-status-badge shrink-0">${getStatusBadgeHtml(cardioChecked)}</div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-medium text-slate-500 mb-1">時間・メニュー</label>
+              <input
+                type="text"
+                data-cardio="true"
+                value="${escapeHtml(state.workout.cardio.text)}"
+                placeholder="例：バイク 20分 / トレッドミル 15分"
+                class="workout-input w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+              >
+            </div>
+          </section>
+        `);
+
+        // 8〜: その他（記入）セクション
+        state.workout.customs.forEach((custom, idx) => {
+          const itemNumber = DEFAULT_STRENGTH_EXERCISES.length + 2 + idx;
+          const titleLabel = idx === 0 ? 'その他（記入）' : `その他（記入 ${idx + 1}）`;
+          const isChecked = Boolean(custom.checked);
+          const customBorderClass = isChecked
+            ? 'border-emerald-600 ring-1 ring-emerald-600/15'
+            : 'border-slate-200/80';
+
+          cards.push(`
+            <section data-card-id="${custom.id}" class="bg-white rounded-2xl p-4 shadow-sm border ${customBorderClass} transition">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <label class="min-h-[44px] flex items-center gap-2.5 cursor-pointer select-none pr-1 min-w-0">
+                  <input
+                    type="checkbox"
+                    data-check-type="custom"
+                    data-target-id="${custom.id}"
+                    aria-label="${escapeHtml(titleLabel)}を今回の報告に含める"
+                    ${isChecked ? 'checked' : ''}
+                    class="workout-check w-5 h-5 rounded-md border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
+                  >
+                  <span class="w-6 h-6 rounded-lg bg-slate-700 text-white text-xs font-bold flex items-center justify-center shrink-0">${itemNumber}</span>
+                  <span class="text-sm font-bold text-slate-900 truncate">${titleLabel}</span>
+                </label>
+
+                <div class="flex items-center gap-1 shrink-0">
+                  <div class="card-status-badge">${getStatusBadgeHtml(isChecked)}</div>
+                  <button
+                    type="button"
+                    data-remove-custom="${custom.id}"
+                    aria-label="この種目を削除"
+                    class="min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-rose-600 rounded-xl transition"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-12 gap-2.5">
+                <div class="col-span-5">
+                  <label class="block text-[11px] font-medium text-slate-500 mb-1">種目名</label>
+                  <input
+                    type="text"
+                    data-custom-id="${custom.id}"
+                    data-field="name"
+                    value="${escapeHtml(custom.name)}"
+                    placeholder="例: 懸垂"
+                    class="workout-input w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                  >
+                </div>
+                <div class="col-span-7">
+                  <label class="block text-[11px] font-medium text-slate-500 mb-1">重量・回数・メモ</label>
+                  <input
+                    type="text"
+                    data-custom-id="${custom.id}"
+                    data-field="detail"
+                    value="${escapeHtml(custom.detail)}"
+                    placeholder="例: 10回×3セット"
+                    class="workout-input w-full min-h-[44px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                  >
+                </div>
+              </div>
+            </section>
+          `);
+        });
+
+        exerciseListContainer.innerHTML = cards.join('');
+      }
+
+      /**
+       * 入力フォーカスを維持したまま単一カードの枠線・チェックボックス・バッジ状態を同期更新
+       */
+      function syncSingleCardVisual(cardId, isChecked) {
+        const cardEl = exerciseListContainer.querySelector(`[data-card-id="${cardId}"]`);
+        if (!cardEl) return;
+
+        const checkboxEl = cardEl.querySelector('.workout-check');
+        if (checkboxEl && checkboxEl.checked !== isChecked) {
+          checkboxEl.checked = isChecked;
+        }
+
+        const badgeContainer = cardEl.querySelector('.card-status-badge');
+        if (badgeContainer) {
+          badgeContainer.innerHTML = getStatusBadgeHtml(isChecked);
+        }
+
+        if (isChecked) {
+          cardEl.classList.remove('border-slate-200/80');
+          cardEl.classList.add('border-emerald-600', 'ring-1', 'ring-emerald-600/15');
+        } else {
+          cardEl.classList.remove('border-emerald-600', 'ring-1', 'ring-emerald-600/15');
+          cardEl.classList.add('border-slate-200/80');
+        }
+      }
+
+      /**
+       * トレーニング報告のコピー用テキスト生成
+       * （チェックがONかつ何か入力されている種目のみ箇条書き出力）
+       */
+      function buildWorkoutReportText() {
+        const displayDate = formatDateSlash(state.workout.date || getTodayDateString());
+        const displayTime = state.workout.time || getCurrentTimeString();
+        const lines = [];
+
+        // 1〜6: 固定マシン種目
+        DEFAULT_STRENGTH_EXERCISES.forEach((ex) => {
+          const data = state.workout.strength[ex.id];
+          if (!data.checked) return;
+
+          const w = (data.weight || '').trim();
+          const r = (data.reps || '').trim();
+          if (!w && !r) return;
+
+          const wFormatted = w ? (/kg/i.test(w) ? w : `${w}kg`) : '';
+          const rFormatted = r ? (/^\d+$/.test(r) ? `${r}回` : r) : '';
+
+          if (wFormatted && rFormatted) {
+            lines.push(`- ${ex.name}：${wFormatted} × ${rFormatted}`);
+          } else if (wFormatted) {
+            lines.push(`- ${ex.name}：${wFormatted}`);
+          } else {
+            lines.push(`- ${ex.name}：${rFormatted}`);
+          }
+        });
+
+        // 7: 有酸素
+        const cardioText = (state.workout.cardio.text || '').trim();
+        if (state.workout.cardio.checked && cardioText) {
+          lines.push(`- 有酸素：${cardioText}`);
+        }
+
+        // 8〜: その他（記入）
+        state.workout.customs.forEach((custom) => {
+          if (!custom.checked) return;
+          const nameVal = (custom.name || '').trim();
+          const detailVal = (custom.detail || '').trim();
+          if (!nameVal && !detailVal) return;
+
+          if (nameVal && detailVal) {
+            lines.push(`- ${nameVal}：${detailVal}`);
+          } else if (nameVal) {
+            lines.push(`- ${nameVal}`);
+          } else {
+            lines.push(`- その他：${detailVal}`);
+          }
+        });
+
+        loggedExerciseCountBadge.textContent = `${lines.length}種目出力`;
+
+        if (lines.length === 0) {
+          return [
+            '【トレーニング報告】',
+            `・日時：${displayDate} ${displayTime}`,
+            '・メニュー：（未選択）',
+          ].join('\n');
+        }
+
+        return [
+          '【トレーニング報告】',
+          `・日時：${displayDate} ${displayTime}`,
+          '・メニュー：',
+          lines.join('\n'),
+        ].join('\n');
+      }
+
+      /**
+       * トレーニングライブプレビュー更新
+       */
+      function updateWorkoutPreview() {
+        workoutPreview.textContent = buildWorkoutReportText();
+      }
+
+      /**
+       * クリップボードへテキストをコピー（iOS Safari / iFrame フォールバック付き）
        */
       function copyTextToClipboard(text) {
         return new Promise((resolve, reject) => {
-          // 1. まず標準の Clipboard API を試行
           if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard
               .writeText(text)
               .then(resolve)
               .catch(() => {
-                // 失敗時はフォールバックへ
                 fallbackCopy(text) ? resolve() : reject();
               });
           } else {
-            // 2. iFrame環境や非セキュア環境向けフォールバック
             fallbackCopy(text) ? resolve() : reject();
           }
         });
       }
 
-      /**
-       * execCommand('copy') を使った確実なフォールバック処理
-       */
       function fallbackCopy(text) {
         try {
           const tempTextarea = document.createElement('textarea');
           tempTextarea.value = text;
-          // iOS Safariで画面スクロールやズームが発生しないよう配置
           tempTextarea.setAttribute('readonly', '');
           tempTextarea.style.position = 'fixed';
           tempTextarea.style.top = '0';
@@ -484,116 +1056,256 @@
       }
 
       /**
-       * コピー完了時のボタンビジュアルフィードバック（2秒間）
+       * コピー完了トースト＆ボタン状態表示
        */
-      function showCopySuccessFeedback() {
+      function showCopySuccessState() {
         if (copyResetTimer) {
           clearTimeout(copyResetTimer);
         }
 
-        // エメラルドグリーンに変更
-        copyBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'shadow-indigo-600/20');
-        copyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-600/25');
+        copyBtn.className =
+          'w-full min-h-[48px] py-3.5 px-5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-bold text-base shadow-lg shadow-emerald-500/25 transition-all duration-200 flex items-center justify-center gap-2';
         copyIcon.classList.add('hidden');
         checkIcon.classList.remove('hidden');
-        copyBtnText.textContent = 'コピーしました！Geminiに貼り付け';
+        copyBtnText.textContent = 'コピーしました！';
+
+        copyToast.classList.remove('opacity-0', 'translate-y-2');
+        copyToast.classList.add('opacity-100', 'translate-y-0');
 
         copyResetTimer = setTimeout(() => {
-          copyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-600/25');
-          copyBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'shadow-indigo-600/20');
-          checkIcon.classList.add('hidden');
-          copyIcon.classList.remove('hidden');
-          copyBtnText.textContent = 'テキストをコピー';
-        }, 2000);
+          resetCopyFeedback();
+        }, 2200);
       }
 
-      // --- イベントリスナーの登録 ---
+      // ==========================================
+      // イベントリスナー登録
+      // ==========================================
 
-      // 時間入力の変更
+      // ナビゲーションタブ切り替え
+      tabMealBtn.addEventListener('click', () => switchTab('meal'));
+      tabWorkoutBtn.addEventListener('click', () => switchTab('workout'));
+
+      // ホーム追加ガイドモーダル開閉
+      openIosGuideBtn.addEventListener('click', () => {
+        iosGuideModal.classList.remove('hidden');
+      });
+      closeIosGuideXBtn.addEventListener('click', () => {
+        iosGuideModal.classList.add('hidden');
+      });
+      closeIosGuideBtn.addEventListener('click', () => {
+        iosGuideModal.classList.add('hidden');
+      });
+      iosGuideModal.addEventListener('click', (e) => {
+        if (e.target === iosGuideModal) {
+          iosGuideModal.classList.add('hidden');
+        }
+      });
+
+      // 食事報告ページイベント
+      mealDateInput.addEventListener('input', (e) => {
+        state.meal.date = e.target.value;
+        updateMealPreview();
+      });
+
       mealTimeInput.addEventListener('input', (e) => {
-        state.time = e.target.value;
-        updatePreview();
+        state.meal.time = e.target.value;
+        updateMealPreview();
       });
 
-      // 「現在時刻」ボタンクリック
-      nowBtn.addEventListener('click', () => {
+      mealNowDateTimeBtn.addEventListener('click', () => {
+        const todayStr = getTodayDateString();
         const nowStr = getCurrentTimeString();
-        state.time = nowStr;
+        state.meal.date = todayStr;
+        state.meal.time = nowStr;
+        mealDateInput.value = todayStr;
         mealTimeInput.value = nowStr;
-        updatePreview();
+        updateMealPreview();
       });
 
-      // タイミング選択ボタンクリック
       categoryBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
-          state.category = btn.dataset.category;
+          state.meal.category = btn.dataset.category;
           renderCategoryButtons();
-          updatePreview();
+          updateMealPreview();
         });
       });
 
-      // トレーニング有無ボタンクリック
       trainingBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
-          state.training = btn.dataset.training;
-          renderTrainingSection();
-          updatePreview();
-          if (state.training === 'あり') {
-            trainingDetailInput.focus();
-          }
+          state.meal.training = btn.dataset.training;
+          renderTrainingButtons();
+          updateMealPreview();
         });
       });
 
-      // トレーニング詳細入力
-      trainingDetailInput.addEventListener('input', (e) => {
-        state.trainingDetail = e.target.value;
-        updatePreview();
-      });
-
-      // 食べたものテキストエリア入力
       mealContentTextarea.addEventListener('input', (e) => {
-        state.mealContent = e.target.value;
-        updatePreview();
+        state.meal.content = e.target.value;
+        updateMealPreview();
       });
 
-      // 「クリア」ボタンクリック
-      clearMealBtn.addEventListener('click', () => {
-        state.mealContent = '';
-        mealContentTextarea.value = '';
-        updatePreview();
-        mealContentTextarea.focus();
+      // トレーニング報告ページ日時イベント
+      workoutDateInput.addEventListener('input', (e) => {
+        state.workout.date = e.target.value;
+        updateWorkoutPreview();
       });
 
-      // 「テキストをコピー」ボタンクリック
+      workoutTimeInput.addEventListener('input', (e) => {
+        state.workout.time = e.target.value;
+        updateWorkoutPreview();
+      });
+
+      workoutNowDateTimeBtn.addEventListener('click', () => {
+        const todayStr = getTodayDateString();
+        const nowStr = getCurrentTimeString();
+        state.workout.date = todayStr;
+        state.workout.time = nowStr;
+        workoutDateInput.value = todayStr;
+        workoutTimeInput.value = nowStr;
+        updateWorkoutPreview();
+      });
+
+      // チェックボックス切り替え（OFFにしても重量・回数の数値は削除せずlocalStorageに保持）
+      exerciseListContainer.addEventListener('change', (e) => {
+        const target = e.target;
+        if (!target.classList.contains('workout-check')) return;
+
+        const checkType = target.dataset.checkType;
+        const targetId = target.dataset.targetId;
+        const isChecked = target.checked;
+
+        if (checkType === 'strength' && state.workout.strength[targetId]) {
+          state.workout.strength[targetId].checked = isChecked;
+          syncSingleCardVisual(targetId, isChecked);
+        } else if (checkType === 'cardio') {
+          state.workout.cardio.checked = isChecked;
+          syncSingleCardVisual('cardio', isChecked);
+        } else if (checkType === 'custom') {
+          const customItem = state.workout.customs.find((item) => item.id === targetId);
+          if (customItem) {
+            customItem.checked = isChecked;
+            syncSingleCardVisual(targetId, isChecked);
+          }
+        }
+
+        saveWorkoutToStorage();
+        updateWorkoutPreview();
+      });
+
+      // 種目カード内のテキスト/数値入力（入力時に自動でチェックON＆localStorageへ即時保存）
+      exerciseListContainer.addEventListener('input', (e) => {
+        const target = e.target;
+        if (!target.classList.contains('workout-input')) return;
+
+        const strengthId = target.dataset.strengthId;
+        const isCardio = target.dataset.cardio === 'true';
+        const customId = target.dataset.customId;
+        const field = target.dataset.field;
+        const hasText = target.value.trim().length > 0;
+
+        if (strengthId && state.workout.strength[strengthId]) {
+          state.workout.strength[strengthId][field] = target.value;
+          if (hasText && !state.workout.strength[strengthId].checked) {
+            state.workout.strength[strengthId].checked = true;
+          }
+          syncSingleCardVisual(strengthId, state.workout.strength[strengthId].checked);
+        } else if (isCardio) {
+          state.workout.cardio.text = target.value;
+          if (hasText && !state.workout.cardio.checked) {
+            state.workout.cardio.checked = true;
+          }
+          syncSingleCardVisual('cardio', state.workout.cardio.checked);
+        } else if (customId) {
+          const customItem = state.workout.customs.find((item) => item.id === customId);
+          if (customItem) {
+            customItem[field] = target.value;
+            if (hasText && !customItem.checked) {
+              customItem.checked = true;
+            }
+            syncSingleCardVisual(customId, customItem.checked);
+          }
+        }
+
+        saveWorkoutToStorage();
+        updateWorkoutPreview();
+      });
+
+      // その他種目行の削除ボタン
+      exerciseListContainer.addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('[data-remove-custom]');
+        if (!removeBtn) return;
+
+        const targetId = removeBtn.dataset.removeCustom;
+        state.workout.customs = state.workout.customs.filter((item) => item.id !== targetId);
+
+        saveWorkoutToStorage();
+        renderExerciseCards();
+        updateWorkoutPreview();
+      });
+
+      // ＋ その他種目を追加ボタン
+      addCustomExerciseBtn.addEventListener('click', () => {
+        const newId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        state.workout.customs.push({
+          id: newId,
+          checked: false,
+          name: '',
+          detail: '',
+        });
+
+        saveWorkoutToStorage();
+        renderExerciseCards();
+        updateWorkoutPreview();
+
+        const newNameInput = exerciseListContainer.querySelector(
+          `[data-custom-id="${newId}"][data-field="name"]`
+        );
+        if (newNameInput) {
+          newNameInput.focus();
+        }
+      });
+
+      // ボトムCTA「テキストをコピー」ボタン
       copyBtn.addEventListener('click', () => {
-        const textToCopy = buildReportText();
+        const textToCopy =
+          state.activeTab === 'meal' ? buildMealReportText() : buildWorkoutReportText();
         copyTextToClipboard(textToCopy).then(() => {
-          showCopySuccessFeedback();
+          showCopySuccessState();
         });
       });
 
-      // iPhoneホーム画面追加ガイドの開閉
-      toggleGuideBtn.addEventListener('click', () => {
-        const isHidden = iosGuideBox.classList.contains('hidden');
-        iosGuideBox.classList.toggle('hidden');
-        toggleGuideBtn.setAttribute('aria-expanded', String(isHidden));
-      });
-
-      closeGuideBtn.addEventListener('click', () => {
-        iosGuideBox.classList.add('hidden');
-        toggleGuideBtn.setAttribute('aria-expanded', 'false');
-      });
-
-      // --- 初期化処理 ---
+      // ==========================================
+      // 初期化処理
+      // ==========================================
       function init() {
-        const now = new Date();
-        state.time = getCurrentTimeString();
-        state.category = detectCategoryByHour(now.getHours());
+        // 前回のトレーニング記録をlocalStorageから復元
+        loadWorkoutFromStorage();
 
-        mealTimeInput.value = state.time;
+        const now = new Date();
+        const todayStr = getTodayDateString();
+        const currentTimeStr = getCurrentTimeString();
+
+        // 食事報告の初期値セット（食べたものは常に空欄）
+        state.meal.date = todayStr;
+        state.meal.time = currentTimeStr;
+        state.meal.category = detectCategoryByHour(now.getHours());
+        state.meal.content = '';
+        mealDateInput.value = todayStr;
+        mealTimeInput.value = currentTimeStr;
+        mealContentTextarea.value = '';
+
+        // トレーニング報告の日時初期値セット
+        state.workout.date = todayStr;
+        state.workout.time = currentTimeStr;
+        workoutDateInput.value = todayStr;
+        workoutTimeInput.value = currentTimeStr;
+
         renderCategoryButtons();
-        renderTrainingSection();
-        updatePreview();
+        renderTrainingButtons();
+        updateMealPreview();
+
+        renderExerciseCards();
+        updateWorkoutPreview();
+        switchTab('meal');
       }
 
       init();
